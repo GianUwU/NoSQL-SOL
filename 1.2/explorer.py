@@ -15,10 +15,11 @@ def main():
         for db in dbs:
             print(f" - {db}")
 
-        db_name = input("\nSelect Database: ").strip()
-        if db_name not in dbs:
+        while True:
+            db_name = input("\nSelect Database: ").strip()
+            if db_name in dbs:
+                break
             print("Database not found.")
-            continue
 
         cols = client[db_name].list_collection_names()
 
@@ -31,10 +32,11 @@ def main():
         for col in cols:
             print(f" - {col}")
 
-        col_name = input("\nSelect Collection: ").strip()
-        if col_name not in cols:
+        while True:
+            col_name = input("\nSelect Collection: ").strip()
+            if col_name in cols:
+                break
             print("Collection not found.")
-            continue
 
         docs = list(client[db_name][col_name].find({}, {"_id": 1}))
 
@@ -47,11 +49,12 @@ def main():
         for doc in docs:
             print(f" - {doc['_id']}")
 
-        doc_input = input("\nSelect Document: ").strip()
         doc_ids = {str(doc["_id"]): doc["_id"] for doc in docs}
-        if doc_input not in doc_ids:
+        while True:
+            doc_input = input("\nSelect Document: ").strip()
+            if doc_input in doc_ids:
+                break
             print("Document not found.")
-            continue
 
         doc = client[db_name][col_name].find_one({"_id": doc_ids[doc_input]})
 
