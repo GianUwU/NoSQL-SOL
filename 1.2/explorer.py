@@ -1,11 +1,22 @@
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
-client = MongoClient("mongodb://localhost:27017/")
+try:
+    client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=3000)
+    client.admin.command("ping")
+except (ConnectionFailure, ServerSelectionTimeoutError):
+    print("Verbindung zur Datenbank fehlgeschlagen.")
+    exit(1)
 
 
 def main():
     while True:
-        dbs = client.list_database_names()
+        try:
+            dbs = client.list_database_names()
+        except Exception as e:
+            print(f"Fehler beim Laden der Datenbanken: {e}")
+            input("\nPress any button to return")
+            continue
 
         print("Databases")
         if not dbs:
@@ -21,7 +32,12 @@ def main():
                 break
             print("Database not found.")
 
-        cols = client[db_name].list_collection_names()
+        try:
+            cols = client[db_name].list_collection_names()
+        except Exception as e:
+            print(f"Fehler beim Laden der Collections: {e}")
+            input("\nPress any button to return")
+            continue
 
         print(f"\n{db_name}\n")
         print("Collections")
@@ -38,7 +54,12 @@ def main():
                 break
             print("Collection not found.")
 
-        docs = list(client[db_name][col_name].find({}, {"_id": 1}))
+        try:
+            docs = list(client[db_name][col_name].find({}, {"_id": 1}))
+        except Exception as e:
+            print(f"Fehler beim Laden der Documents: {e}")
+            input("\nPress any button to return")
+            continue
 
         print(f"\n{db_name}.{col_name}\n")
         print("Documents")
@@ -56,7 +77,12 @@ def main():
                 break
             print("Document not found.")
 
-        doc = client[db_name][col_name].find_one({"_id": doc_ids[doc_input]})
+        try:
+            doc = client[db_name][col_name].find_one({"_id": doc_ids[doc_input]})
+        except Exception as e:
+            print(f"Fehler beim Laden des Documents: {e}")
+            input("\nPress any button to return")
+            continue
 
         print(f"\n{db_name}.{col_name}.{doc_input}\n")
         for key, value in doc.items():
